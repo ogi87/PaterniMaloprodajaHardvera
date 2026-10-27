@@ -127,12 +127,8 @@ DrugiProjekatPaterni/
 │   │   └── UslugaAdapter.java          <-- Adapter koji prilagođava Usluga na Komponenta
 │   ├── podsistem/
 │   │   └── MaloprodajniPodsistem.java  <-- Maloprodajni podsistem (evidencija i izveštaj)
-│   ├── panel/                          <-- NETBEANS JPANEL FORME (Design / Drag & Drop)
-│   │   ├── FormInputPanel.java         <-- Polimorfni interfejs za ulazne panele (iz Projekta 1)
-│   │   ├── KomponentaPanel.java / .form <-- NetBeans JPanel Form za hardver sa GUI Designerom
-│   │   └── UslugaPanel.java / .form     <-- NetBeans JPanel Form za usluge sa GUI Designerom
 │   ├── form/
-│   │   └── MainForm.java / .form       <-- NetBeans JFrame Form (glavna forma sa GUI Designerom)
+│   │   └── MainForm.java / .form       <-- NetBeans JFrame Form (čist minimalistički GUI Designer)
 │   └── main/
 │       └── Main.java                   <-- Glavna ulazna tačka programa
 ├── test/
@@ -149,20 +145,39 @@ DrugiProjekatPaterni/
 
 ## 4. Korisnički interfejs (Swing GUI)
 
-Aplikacija poseduje moderan i intuitivan grafički interfejs:
+Forma `MainForm` je dizajnirana minimalistički i pregledno, u potpunosti kompatibilna sa **NetBeans GUI Builder (Design mod)**:
 
-1. **Unos hardverskih artikala:**
-   - Direktno kreiranje instance `HardverskaKomponenta` sa nazivom, specifikacijom, dobavljačem i cenom.
-2. **Unos instalacionih usluga (kroz Adapter):**
-   - Unos naziva usluge, opisa aktivnosti, servisera, cene bez PDV-a i stope PDV-a (npr. 20%).
-   - Klikom na dugme instancira se `InstalacionaUsluga`, a zatim se automatski omotava u `UslugaAdapter` i dodaje u maloprodajni podsistem.
-3. **Prikaz i tabela izveštaja (`JTable`):**
-   - Pregled svih stavki sa automatskim proračunom ukupnog broja i sume prometa.
-   - Kolona „Tip stavke“ jasno ilustruje da li je stavka izvorna `Hardverska komponenta` ili adaptirana `Usluga (Adapter)`.
-4. **Zvanični tekstualni izveštaj:**
-   - Klikom na dugme „Prikaži zvanični izveštaj“ otvara se formatirani prikaz izveštaja sa datumom, kolonama i zaglavljem.
-5. **Dugme „Učitaj demo podatke“:**
-   - Jednim klikom popunjava tabelu mešovitim stavkama (procesor, grafička karta, SSD, sklapanje računara, instalacija sistema, čišćenje i pasta) radi brze demonstracije profesoru/asistentu.
+1. **Panel „Unos hardverske komponente“:**
+   - Polja: *Naziv*, *Dobavljač*, *Prodajna cena (RSD)*.
+   - Klikom na dugme **„Dodaj komponentu“** instancira se `HardverskaKomponenta` i dodaje u podsistem:
+     ```java
+     Komponenta k = new HardverskaKomponenta(naziv, dobavljac, cena);
+     podsistem.dodajProdatuKomponentu(k);
+     ```
+
+2. **Panel „Unos servisne usluge (Adapter)“:**
+   - Polja: *Opis usluge*, *Serviser*, *Cena bez PDV*, *PDV (%)* (podrazumevano 20%).
+   - Klikom na dugme **„Dodaj uslugu (Adapter)“** demonstrira se srž Adapter uzora:
+     ```java
+     // 1. Kreiranje Adaptee objekta
+     Usluga usluga = new InstalacionaUsluga(opis, serviser, cenaBezPdv, pdv);
+
+     // 2. Obavijanje u Adapter (koji implementira Komponenta)
+     Komponenta adapter = new UslugaAdapter(usluga);
+
+     // 3. Maloprodaja prihvata adapter jer očekuje Komponenta!
+     podsistem.dodajProdatuKomponentu(adapter);
+     ```
+
+3. **Tabela prodatih stavki (`tblStavke`):**
+   - Kolone: *R.br.*, *Tip*, *Specifikacija / Opis*, *Dobavljač / Serviser*, *Cena sa PDV (RSD)*.
+   - Polimorfno prikazuje i hardver i adaptirane usluge.
+
+4. **Donje komande i akcije:**
+   - **Labela ukupnog iznosa:** Prikazuje zbirnu vrednost svih stavki u maloprodaji.
+   - **Dugme „Učitaj demo“:** Popunjava tabelu primerima hardvera i usluga radi brze demonstracije na času.
+   - **Dugme „Obriši stavku“:** Uklanja selektovani red iz evidencije maloprodaje.
+   - **Dugme „Prikaži izveštaj“:** Otvara modalni prozor sa formatiranim tekstualnim izveštajem iz podsistema (`podsistem.kreirajIzvjestaj()`).
 
 ---
 
